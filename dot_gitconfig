@@ -1,0 +1,58 @@
+[user]
+    email = contact@getjump.me
+    name = Pavel Savinov
+
+[core]
+    editor = nvim
+    excludesFile = ~/.gitignore
+
+[commit]
+    verbose = true
+
+#[merge]
+#    tool = nvim-diff4
+
+[pull]
+    ff = only
+
+[diff]
+    tool = nvimdiff
+
+[mergetool "nvimdiff"]
+    cmd = nvim -d \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+    ; Abort operation if editor exited with non-zero status
+    trustExitCode = true
+
+[difftool "nvimdiff"]
+    cmd = nvim -d \"$LOCAL\" \"$REMOTE\"
+    ; Abort operation if editor exited with non-zero status
+    trustExitCode = true
+
+[alias]
+    ; Aliases for `git` commands
+    status-short = status --short
+    statuss = status-short
+    addp = add --patch
+    addi = add --interactive
+    log-oneline = log --pretty=format:\"%C(auto)%h %d %s %C(green)(%an) %C(italic cyan)[%ad]\" --date=relative --graph
+    log1 = log-oneline
+    log-files = log1 --name-status
+    logf = log-files
+    log-stat = log1 --stat
+    logs = log-stat
+    log-diff-upstream = log-oneline --left-right HEAD...@{u}
+    log-diff-master = log-oneline --left-right HEAD...origin/master
+    last = log -1
+    diff-staged = diff --staged
+    diffs = diff-staged
+    branch-master = "!f() { git fetch; git checkout --no-track -b $1 origin/master; }; f"
+    branch-develop = "!f() { git fetch; git checkout --no-track -b $1 origin/develop; }; f"
+    branch-rename = "!f() { git push origin -d $(git branch --show-current); git branch -m $(git branch --show-current) $1; git push-new; }; f"
+    push-new = push --set-upstream origin HEAD
+    delete-merged-branches = !git branch --merged | egrep -v \"(^\\*|master|dev)\" | xargs git branch -d
+    config-list-all = config --list
+    config-list-all-origin = config --list --show-origin
+
+[rerere]
+    ; Track and remember conflict resolutions
+	  enabled = true

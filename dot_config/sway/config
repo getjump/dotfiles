@@ -1,0 +1,375 @@
+# Default config for sway
+#
+# Copy this to ~/.config/sway/config and edit it to your liking.
+#
+# Read `man 5 sway` for a complete reference.
+
+### Variables
+#
+# Logo key. Use Mod1 for Alt.
+set $mod Mod4
+# Home row direction keys, like vim
+set $left h
+set $down j
+set $up k
+set $right l
+# Your preferred terminal emulator
+#set $term alacritty -vvv &> /home/getjump/alacritty.log
+set $term foot
+# Your preferred application launcher
+# Note: pass the final command to swaymsg so that the resulting window can be opened
+# on the original workspace that the command was run on.
+set $menu wofi --show=drun --prompt="Enter the application name" | swaymsg exec --
+
+set $browser firefox
+set $term foot
+set $locker --no-startup-id swaylock
+# set $screenshot
+
+set $window_border 2
+
+# ___
+#  | |_  _  _ _ . _  _
+#  | | |(/_| | ||| |(_|
+#                    _|
+
+font pango:M+ 1m Medium 11
+# for_window [class=".*"] title_format " %title"
+default_border pixel
+
+set $bg     #0a0a0a
+set $fg     #c8c8c8
+set $color1 #a54242
+set $color4 #5f819d
+
+#                       |---- Titlebar ----|  |---- Frame ----|
+# Class                 Border  Backgr. Text  Indicator Border
+client.focused          $color1 $color1 $fg   $color4   $color1
+client.focused_inactive $color1 $bg     $fg   $color4   $bg
+client.unfocused        $color1 $bg     $fg   $color4   $bg
+client.urgent           $bg     $bg     $fg   $color4   $bg
+client.placeholder      $bg     $bg     $fg   $color4   $bg
+
+client.background       $bg
+
+#  __
+# / _  _  _  _
+# \__)(_||_)_)
+#        |
+
+gaps inner 12
+smart_gaps on
+smart_borders on
+
+for_window [class="^.*"] border pixel $window_border
+
+#
+# \    / _  _|  _ _  _  _ _  _
+#  \/\/ (_)| |<_)|_)(_|(_(/__)
+#                |
+
+set $ws_web    1:WWW
+set $ws_term   2:Terminals
+set $ws_dev    3:Editor
+set $ws_chat   4:Chat
+set $ws_tex    5:Tex
+set $ws_games  6:Games
+set $ws7       7:7
+set $ws8       8:8
+set $ws9       9:9
+set $ws_music 10:Music
+
+# Default Layouts
+for_window [workspace=$ws_dev] layout tabbed
+for_window [workspace=$ws_chat] layout tabbed
+
+# Firefox
+for_window [class="(?i)firefox" window_role="^(?!About$)" window_type="normal"] \
+  move to workspace $ws_web, focus
+for_window [class="(?i)firefox" window_role="About"] floating enable
+# Hide border on Firefox popups (e.g. "Extension has been added")
+for_window [class="(?i)firefox" window_role="Popup"] border none
+
+# JetBrains IDEs
+assign [class="jetbrains-(?!toolbox).+" window_type="normal"] $ws_dev
+# JetBrains Toolbox
+for_window [class="jetbrains-toolbox"] floating enable, border pixel 1
+# JetBrains Splash/Customize Screens
+for_window [class="jetbrains-.+" title="^(win0|Customize .+)$"] \
+  move to workspace $ws_dev, floating enable, border pixel 1
+
+# Communication
+assign [class="Element|Evolution|Thunderbird|TelegramDesktop"] $ws_chat
+
+
+### Output configuration
+#
+# Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
+output * bg `ls -1 ~/wallpapers/* | sort -R | head -1` fill
+
+set $ASUS DP-1
+set $DELL DP-2
+
+output $ASUS pos 0 0 res 2560x1440
+output $DELL pos 2560 0 res 2560x1440@144Hz
+
+workspace $ws_web output $DELL $ASUS
+workspace $ws_term output $ASUS $DELL
+workspace $ws_dev output $ASUS $DELL
+workspace $ws_games output $ASUS $DELL
+
+#
+# Example configuration:
+#
+#   output HDMI-A-1 resolution 1920x1080 position 1920,0
+#
+# You can get the names of your outputs by running: swaymsg -t get_outputs
+
+### Idle configuration
+#
+# Example configuration:
+#
+# exec swayidle -w \
+#          timeout 300 'swaylock -f -c 000000' \
+#          timeout 600 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
+#          before-sleep 'swaylock -f -c 000000'
+#
+# This will lock your screen after 300 seconds of inactivity, then turn off
+# your displays after another 300 seconds, and turn your screens back on when
+# resumed. It will also lock your screen before your computer goes to sleep.
+
+### Input configuration
+#
+# Example configuration:
+#
+#   input "2:14:SynPS/2_Synaptics_TouchPad" {
+#       dwt enabled
+#       tap enabled
+#       natural_scroll enabled
+#       middle_emulation enabled
+#   }
+#
+# You can get the names of your inputs by running: swaymsg -t get_inputs
+# Read `man 5 sway-input` for more information about this section.
+
+### Key bindings
+#
+# Basics:
+
+    # Locker
+    bindsym $mod+Shift+o exec $locker
+
+    # Back and forth
+    bindsym $mod+Tab workspace back_and_forth
+
+    # Start a terminal
+    bindsym $mod+Return exec $term
+
+    # Kill focused window
+    bindsym $mod+Shift+q kill
+
+    # Start your launcher
+    bindsym $mod+d exec $menu
+
+    # Drag floating windows by holding down $mod and left mouse button.
+    # Resize them with right mouse button + $mod.
+    # Despite the name, also works for non-floating windows.
+    # Change normal to inverse to use left mouse button for resizing and right
+    # mouse button for dragging.
+    floating_modifier $mod normal
+
+    # Reload the configuration file
+    bindsym $mod+Shift+c reload
+
+    # Exit sway (logs you out of your Wayland session)
+    bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+#
+# Moving around:
+#
+    # Move your focus around
+    bindsym $mod+$left focus left exec --no-startup-id flash_window
+    bindsym $mod+$down focus down exec --no-startup-id flash_window
+    bindsym $mod+$up focus up exec --no-startup-id flash_window
+    bindsym $mod+$right focus right exec --no-startup-id flash_window
+    # Or use $mod+[up|down|left|right]
+    bindsym $mod+Left focus left exec --no-startup-id flash_window
+    bindsym $mod+Down focus down exec --no-startup-id flash_window
+    bindsym $mod+Up focus up exec --no-startup-id flash_window
+    bindsym $mod+Right focus right exec --no-startup-id flash_window 
+
+    # Move the focused window with the same, but add Shift
+    bindsym $mod+Shift+$left move left; exec --no-startup-id flash_window
+    bindsym $mod+Shift+$down move down; exec --no-startup-id flash_window
+    bindsym $mod+Shift+$up move up; exec --no-startup-id flash_window
+    bindsym $mod+Shift+$right move right; exec --no-startup-id flash_window
+    # Ditto, with arrow keys
+    bindsym $mod+Shift+Left move left; exec --no-startup-id flash_window
+    bindsym $mod+Shift+Down move down; exec --no-startup-id flash_window
+    bindsym $mod+Shift+Up move up; exec --no-startup-id flash_window
+    bindsym $mod+Shift+Right move right; exec --no-startup-id flash_window
+#
+
+    # Move workspace between outputs
+    bindsym $mod+Ctrl+$left  move workspace to output left
+    bindsym $mod+Ctrl+$down  move workspace to output down
+    bindsym $mod+Ctrl+$up    move workspace to output up
+    bindsym $mod+Ctrl+$right move workspace to output right
+
+    # Move workspace between outputs
+    bindsym $mod+Ctrl+Left  move workspace to output left
+    bindsym $mod+Ctrl+Down  move workspace to output down
+    bindsym $mod+Ctrl+Up    move workspace to output up
+    bindsym $mod+Ctrl+Right move workspace to output right
+
+
+
+# Workspaces:
+#
+    # Switch to workspace
+    bindsym $mod+1 workspace number $ws_web; exec --no-startup-id flash_window
+    bindsym $mod+2 workspace number $ws_term; exec --no-startup-id flash_window
+    bindsym $mod+3 workspace number $ws_dev; exec --no-startup-id flash_window
+    bindsym $mod+4 workspace number $ws_chat; exec --no-startup-id flash_window
+    bindsym $mod+5 workspace number $ws_tex; exec --no-startup-id flash_window
+    bindsym $mod+6 workspace number $ws_games; exec --no-startup-id flash_window
+    bindsym $mod+7 workspace number $ws7; exec --no-startup-id flash_window
+    bindsym $mod+8 workspace number $ws8; exec --no-startup-id flash_window
+    bindsym $mod+9 workspace number $ws9; exec --no-startup-id flash_window
+    bindsym $mod+0 workspace number $ws_music; exec --no-startup-id flash_window
+    # Move focused container to workspace
+    bindsym $mod+Shift+1 move container to workspace number $ws_web; exec --no-startup-id flash_window
+    bindsym $mod+Shift+2 move container to workspace number $ws_term; exec --no-startup-id flash_window
+    bindsym $mod+Shift+3 move container to workspace number $ws_dev; exec --no-startup-id flash_window
+    bindsym $mod+Shift+4 move container to workspace number $ws_chat; exec --no-startup-id flash_window
+    bindsym $mod+Shift+5 move container to workspace number $ws_tex; exec --no-startup-id flash_window
+    bindsym $mod+Shift+6 move container to workspace number $ws_games; exec --no-startup-id flash_window
+    bindsym $mod+Shift+7 move container to workspace number $ws7; exec --no-startup-id flash_window
+    bindsym $mod+Shift+8 move container to workspace number $ws8; exec --no-startup-id flash_window
+    bindsym $mod+Shift+9 move container to workspace number $ws9; exec --no-startup-id flash_window
+    bindsym $mod+Shift+0 move container to workspace number $ws_music; exec --no-startup-id flash_window
+    # Note: workspaces can have any name you want, not just numbers.
+    # We just use 1-10 as the default.
+#
+# Layout stuff:
+#
+    # You can "split" the current object of your focus with
+    # $mod+b or $mod+v, for horizontal and vertical splits
+    # respectively.
+    bindsym $mod+b splith exec --no-startup-id flash_window
+    bindsym $mod+v splitv exec --no-startup-id flash_window
+
+    # Switch the current container between different layout styles
+    bindsym $mod+s layout stacking; exec --no-startup-id flash_window
+    bindsym $mod+w layout tabbed; exec --no-startup-id flash_window
+    bindsym $mod+e layout toggle split; exec --no-startup-id flash_window
+
+    # Make the current focus fullscreen
+    bindsym $mod+f fullscreen exec --no-startup-id flash_window
+    
+    bindsym $mod+y fullscreen disable; floating enable; resize set 400 300;
+
+    # Toggle the current focus between tiling and floating mode
+    bindsym $mod+Shift+space floating toggle 
+
+    # Swap focus between the tiling area and the floating area
+    bindsym $mod+space focus mode_toggle exec --no-startup-id flash_window
+
+    # Move focus to the parent container
+    bindsym $mod+a focus parent exec --no-startup-id flash_window
+#
+# Scratchpad:
+#
+    # Sway has a "scratchpad", which is a bag of holding for windows.
+    # You can send windows there and get them back later.
+
+    # Move the currently focused window to the scratchpad
+    bindsym $mod+Shift+minus move scratchpad
+
+    # Show the next scratchpad window or hide the focused scratchpad window.
+    # If there are multiple scratchpad windows, this command cycles through them.
+    bindsym $mod+minus scratchpad show
+
+    # bindsym $mod+Shift+plus move bag
+    # bindsym $mod+plus bag show
+#
+# Resizing containers:
+#
+mode "resize" {
+    # left will shrink the containers width
+    # right will grow the containers width
+    # up will shrink the containers height
+    # down will grow the containers height
+    bindsym $left resize shrink width 10px
+    bindsym $down resize grow height 10px
+    bindsym $up resize shrink height 10px
+    bindsym $right resize grow width 10px
+
+    # Ditto, with arrow keys
+    bindsym Left resize shrink width 10px
+    bindsym Down resize grow height 10px
+    bindsym Up resize shrink height 10px
+    bindsym Right resize grow width 10px
+
+    # Return to default mode
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym $mod+r mode "resize"
+
+set $mode_power \
+    "r restart, s shutdown, l i3 exit, p suspend"
+mode $mode_power {
+    bindsym s exec shutdown now
+    bindsym r exec shutdown -r now
+    bindsym l exec i3-msg exit
+    bindsym p exec systemctl suspend
+
+    bindsym Escape mode "default"
+    bindsym Return mode "default"
+}
+
+bindsym $mod+Shift+x mode $mode_power
+
+input "type:keyboard" {
+    xkb_layout us,ru
+    repeat_delay 400
+    repeat_rate 25
+    xkb_options grp:alt_shift_toggle
+}
+
+#input type:pointer {
+#    accel_profile flat
+#}
+
+#
+# Status Bar:
+#
+# Read `man 5 sway-bar` for more information about this section.
+bar {
+    swaybar_command waybar
+}
+
+# bindsym shift+alt exec "swaymsg input type:keyboard xkb_switch_layout next; pkill --signal sigrtmin+1 waybar"
+
+# default_border none
+
+# set $opacity 0.5
+
+# for_window [class=".*"] opacity $opacity
+# for_window [app_id=".*"] opacity $opacity
+
+bindsym $mod+P exec grimshot copy screen | xargs cat | wl-copy
+bindsym $mod+Ctrl+P exec grimshot copy area | xargs cat | wl-copy
+bindsym $mod+Shift+P exec grimshot copy window | xargs cat | wl-copy
+
+# bindsym $mod+Alt+P exec grimshot save screen
+# bindsym $mod+Ctrl+Alt+P exec grimshot save area
+# bindsym $mod+Ctrl+Alt+P exec grimshot save window
+
+exec_always --no-startup-id flashfocus
+exec_always --no-startup-id kmix
+exec sleep 5
+exec --no-startup-id blueman-applet
+exec mako
+
+include /etc/sway/config.d/*
